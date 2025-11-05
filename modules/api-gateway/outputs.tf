@@ -25,7 +25,7 @@ output "default_stage_invoke_url" {
 
 output "log_group_name" {
   description = "Name of the CloudWatch log group"
-  value       = aws_cloudwatch_log_group.api_gateway_log_group.name
+  value       = module.api_gateway.stage_access_logs_cloudwatch_log_group_name
 }
 
 output "default_stage_execution_arn" {

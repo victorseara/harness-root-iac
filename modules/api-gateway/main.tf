@@ -16,35 +16,33 @@ module "api_gateway" {
     allow_credentials = var.cors_allow_credentials
   }
 
-  # Default stage
-  create_default_stage = true
-  default_stage_access_log_destination_arn = aws_cloudwatch_log_group.api_gateway_log_group.arn
-  default_stage_access_log_format = jsonencode({
-    requestId      = "$context.requestId"
-    ip             = "$context.identity.sourceIp"
-    requestTime    = "$context.requestTime"
-    httpMethod     = "$context.httpMethod"
-    routeKey       = "$context.routeKey"
-    status         = "$context.status"
-    protocol       = "$context.protocol"
-    responseLength = "$context.responseLength"
-  })
-
-  # Lambda integration with default route
-  integrations = {
+  # Routes with Lambda integration (v5.x uses routes instead of integrations)
+  routes = {
     "$default" = {
-      lambda_arn             = var.lambda_arn
-      payload_format_version = "2.0"
-      timeout_milliseconds   = var.integration_timeout_ms
+      integration = {
+        uri                    = var.lambda_arn
+        type                   = "AWS_PROXY"
+        payload_format_version = "2.0"
+        timeout_milliseconds   = var.integration_timeout_ms
+      }
     }
   }
 
-  tags = var.tags
-}
-
-resource "aws_cloudwatch_log_group" "api_gateway_log_group" {
-  name              = "/aws/apigateway/${var.api_name}"
-  retention_in_days = var.log_retention_days
+  # Stage access logging (v5.x syntax)
+  stage_access_log_settings = {
+    create_log_group            = true
+    log_group_retention_in_days = var.log_retention_days
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      requestTime    = "$context.requestTime"
+      httpMethod     = "$context.httpMethod"
+      routeKey       = "$context.routeKey"
+      status         = "$context.status"
+      protocol       = "$context.protocol"
+      responseLength = "$context.responseLength"
+    })
+  }
 
   tags = var.tags
 }
