@@ -15,12 +15,12 @@ output "api_execution_arn" {
 
 output "default_stage_id" {
   description = "ID of the default stage"
-  value       = module.api_gateway.default_stage_id
+  value       = module.api_gateway.stage_id
 }
 
 output "default_stage_invoke_url" {
   description = "Invoke URL of the default stage"
-  value       = module.api_gateway.default_stage_invoke_url
+  value       = module.api_gateway.stage_invoke_url
 }
 
 output "log_group_name" {
@@ -30,5 +30,5 @@ output "log_group_name" {
 
 output "default_stage_execution_arn" {
   description = "Execution ARN of the default stage"
-  value       = module.api_gateway.default_stage_execution_arn
+  value       = module.api_gateway.stage_execution_arn
 }
