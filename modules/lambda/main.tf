@@ -15,7 +15,7 @@ module "lambda_function" {
   environment_variables = var.environment_variables
 
   # Ignore code changes - deployments handled outside Terraform
-  ignore_source_code_hash = var.ignore_source_code_hash
+  # ignore_source_code_hash = var.ignore_source_code_hash
 
   # IAM
   create_role = true
