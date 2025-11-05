@@ -6,6 +6,11 @@ module "api_gateway" {
   description   = var.description
   protocol_type = "HTTP"
 
+  # Disable custom domain and certificate creation
+  create_domain_name    = false
+  create_certificate    = false
+  create_domain_records = false
+
   # CORS configuration
   cors_configuration = {
     allow_headers     = var.cors_allow_headers
