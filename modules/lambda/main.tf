@@ -30,6 +30,9 @@ module "lambda_function" {
   # API Gateway permissions
   create_lambda_function_url = false
 
+  # Disable versioning/aliasing to use unqualified ARN
+  create_current_version_allowed_triggers = false
+
   allowed_triggers = var.create_api_gateway_permission ? {
     APIGatewayAny = {
       service    = "apigateway"

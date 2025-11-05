@@ -1,18 +1,18 @@
-module "api_gateway" {
-  source  = "terraform-aws-modules/apigateway-v2/aws"
-  version = "~> 5.0"
+# Create CloudWatch log group for API Gateway with proper naming
+resource "aws_cloudwatch_log_group" "api_gateway" {
+  name              = "/aws/apigateway/${var.api_name}"
+  retention_in_days = var.log_retention_days
 
+  tags = var.tags
+}
+
+# Create API Gateway
+resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
   description   = var.description
   protocol_type = "HTTP"
 
-  # Disable custom domain and certificate creation
-  create_domain_name    = false
-  create_certificate    = false
-  create_domain_records = false
-
-  # CORS configuration
-  cors_configuration = {
+  cors_configuration {
     allow_headers     = var.cors_allow_headers
     allow_methods     = var.cors_allow_methods
     allow_origins     = var.cors_allow_origins
@@ -21,22 +21,36 @@ module "api_gateway" {
     allow_credentials = var.cors_allow_credentials
   }
 
-  # Routes with Lambda integration (v5.x uses routes instead of integrations)
-  routes = {
-    "$default" = {
-      integration = {
-        uri                    = var.lambda_arn
-        type                   = "AWS_PROXY"
-        payload_format_version = "2.0"
-        timeout_milliseconds   = var.integration_timeout_ms
-      }
-    }
-  }
+  tags = var.tags
+}
 
-  # Stage access logging (v5.x syntax)
-  stage_access_log_settings = {
-    create_log_group            = true
-    log_group_retention_in_days = var.log_retention_days
+# Create Lambda integration
+resource "aws_apigatewayv2_integration" "lambda" {
+  api_id = aws_apigatewayv2_api.this.id
+
+  integration_type   = "AWS_PROXY"
+  integration_uri    = var.lambda_arn
+  integration_method = "POST"
+
+  payload_format_version = "2.0"
+  timeout_milliseconds   = var.integration_timeout_ms
+}
+
+# Create default route
+resource "aws_apigatewayv2_route" "default" {
+  api_id    = aws_apigatewayv2_api.this.id
+  route_key = "$default"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+# Create stage with access logging
+resource "aws_apigatewayv2_stage" "default" {
+  api_id      = aws_apigatewayv2_api.this.id
+  name        = "$default"
+  auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
     format = jsonencode({
       requestId      = "$context.requestId"
       ip             = "$context.identity.sourceIp"
@@ -50,4 +64,6 @@ module "api_gateway" {
   }
 
   tags = var.tags
+
+  depends_on = [aws_cloudwatch_log_group.api_gateway]
 }
