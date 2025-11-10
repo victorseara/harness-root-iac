@@ -6,8 +6,7 @@ This module is a wrapper around the official [terraform-aws-modules/lambda/aws](
 
 - Uses the battle-tested official AWS Lambda Terraform module
 - Simplified configuration for common use cases
-- Automatic CloudWatch log group creation with configurable retention
-- Built-in IAM role creation with CloudWatch Logs permissions
+- Built-in IAM role creation
 - Optional custom IAM policies
 - Optional API Gateway invoke permissions
 - Support for existing deployment packages
@@ -32,8 +31,6 @@ module "my_lambda" {
     NODE_ENV = "production"
     API_KEY  = "your-api-key"
   }
-
-  log_retention_days = 14
 
   # If using with API Gateway
   create_api_gateway_permission = true
@@ -106,7 +103,6 @@ output "api_url" {
 | environment_variables | Environment variables for the Lambda function | map(string) | {} | no |
 | role_name | Name of the IAM role (defaults to {function_name}-role) | string | null | no |
 | tags | Tags to apply to resources | map(string) | {} | no |
-| log_retention_days | CloudWatch log retention in days | number | 7 | no |
 | custom_policy_json | Custom IAM policy JSON for the Lambda function | string | null | no |
 | create_api_gateway_permission | Whether to create API Gateway invoke permission | bool | false | no |
 | api_gateway_execution_arn | ARN of the API Gateway execution | string | null | no |
@@ -121,15 +117,12 @@ output "api_url" {
 | invoke_arn | Invoke ARN of the Lambda function |
 | role_arn | ARN of the Lambda IAM role |
 | role_name | Name of the Lambda IAM role |
-| log_group_name | Name of the CloudWatch log group |
 | qualified_arn | Qualified ARN of the Lambda function |
 | version | Latest published version of the Lambda function |
 
 ## Notes
 
 - This module uses the official terraform-aws-modules/lambda/aws module (version ~> 7.0)
-- The module automatically creates a CloudWatch log group with the standard naming convention `/aws/lambda/{function_name}`
-- The IAM role includes CloudWatch Logs permissions automatically
 - Use `custom_policy_json` to add additional permissions (e.g., DynamoDB, S3 access)
 - When using with API Gateway, make sure to append `/*` to the execution ARN for the permission
 

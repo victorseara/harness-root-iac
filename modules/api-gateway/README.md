@@ -9,7 +9,6 @@ This module is a wrapper around the official [terraform-aws-modules/apigateway-v
 - Default route (`$default`) that proxies ALL requests to Lambda
 - Automatic Lambda integration with AWS_PROXY
 - Built-in CORS configuration
-- CloudWatch logging with structured JSON logs
 - Automatic deployment enabled
 
 ## Usage
@@ -27,8 +26,6 @@ module "api_gateway" {
   cors_allow_methods  = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
   cors_allow_headers  = ["Content-Type", "Authorization"]
   cors_allow_credentials = true
-
-  log_retention_days = 14
 
   tags = {
     Environment = "production"
@@ -94,7 +91,6 @@ output "api_url" {
 | cors_expose_headers | CORS exposed headers | list(string) | [] | no |
 | cors_max_age | CORS max age in seconds | number | 300 | no |
 | cors_allow_credentials | Whether to allow credentials in CORS | bool | false | no |
-| log_retention_days | CloudWatch log retention in days | number | 7 | no |
 | tags | Tags to apply to resources | map(string) | {} | no |
 
 ## Outputs
@@ -106,7 +102,6 @@ output "api_url" {
 | api_execution_arn | Execution ARN of the API Gateway (use for Lambda permissions) |
 | default_stage_id | ID of the default stage |
 | default_stage_invoke_url | Full invoke URL of the default stage |
-| log_group_name | Name of the CloudWatch log group |
 | default_stage_execution_arn | Execution ARN of the default stage |
 
 ## How It Works
@@ -126,7 +121,6 @@ The Lambda integration uses:
 - **Lambda ARN**: This module requires the Lambda function ARN (not the invoke ARN). Use `module.lambda.function_arn`
 - **Lambda Permissions**: Make sure to set `create_api_gateway_permission = true` in the Lambda module and pass `${module.api_gateway.api_execution_arn}/*`
 - **CORS**: CORS is configured at the API Gateway level for better performance
-- **Logging**: CloudWatch logs are structured as JSON for easy parsing
 - **Official Module**: This wrapper uses terraform-aws-modules/apigateway-v2/aws version ~> 5.0
 
 ## Advanced Configuration
