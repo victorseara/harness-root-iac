@@ -22,6 +22,9 @@ module "lambda_function" {
   role_name   = var.role_name != null ? var.role_name : "${var.function_name}-role"
   attach_cloudwatch_logs_policy = false
 
+  # Disable CloudWatch Logs
+  use_existing_cloudwatch_log_group = true
+
   # Additional policies
   attach_policy_json = var.custom_policy_json != null
   policy_json        = var.custom_policy_json
