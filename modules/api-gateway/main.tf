@@ -1,3 +1,34 @@
+# Create CloudWatch log group for API Gateway with proper naming
+resource "aws_cloudwatch_log_group" "api_gateway" {
+  name              = "/aws/apigateway/${var.api_name}"
+  retention_in_days = var.log_retention_days
+
+  tags = var.tags
+}
+
+# Add resource policy to allow API Gateway to write to the log group
+resource "aws_cloudwatch_log_resource_policy" "api_gateway" {
+  policy_name = "${var.api_name}-log-policy"
+
+  policy_document = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        }
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:CreateLogGroup"
+        ]
+        Resource = "${aws_cloudwatch_log_group.api_gateway.arn}:*"
+      }
+    ]
+  })
+}
+
 # Create API Gateway
 resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
@@ -35,11 +66,33 @@ resource "aws_apigatewayv2_route" "default" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
-# Create stage without logging for faster demo deployments
+# Create stage with access logging
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
   auto_deploy = true
 
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      requestTime    = "$context.requestTime"
+      httpMethod     = "$context.httpMethod"
+      routeKey       = "$context.routeKey"
+      status         = "$context.status"
+      protocol       = "$context.protocol"
+      responseLength = "$context.responseLength"
+    })
+  }
+
   tags = var.tags
+
+  # Explicitly depend on the CloudWatch log group and policy being created
+  # This ensures AWS has time to propagate the log delivery configuration
+  depends_on = [
+    aws_cloudwatch_log_group.api_gateway,
+    aws_cloudwatch_log_resource_policy.api_gateway,
+    aws_apigatewayv2_route.default
+  ]
 }

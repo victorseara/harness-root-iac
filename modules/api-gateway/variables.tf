@@ -56,6 +56,12 @@ variable "cors_allow_credentials" {
   default     = false
 }
 
+variable "log_retention_days" {
+  description = "CloudWatch log retention in days"
+  type        = number
+  default     = 7
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

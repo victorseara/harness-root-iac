@@ -56,6 +56,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "log_retention_days" {
+  description = "CloudWatch log retention in days"
+  type        = number
+  default     = 7
+}
+
 variable "custom_policy_json" {
   description = "Custom IAM policy JSON for the Lambda function"
   type        = string
