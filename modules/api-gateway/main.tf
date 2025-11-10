@@ -20,7 +20,8 @@ resource "aws_cloudwatch_log_resource_policy" "api_gateway" {
         }
         Action = [
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:CreateLogGroup"
         ]
         Resource = "${aws_cloudwatch_log_group.api_gateway.arn}:*"
       }
@@ -87,8 +88,11 @@ resource "aws_apigatewayv2_stage" "default" {
 
   tags = var.tags
 
+  # Explicitly depend on the CloudWatch log group and policy being created
+  # This ensures AWS has time to propagate the log delivery configuration
   depends_on = [
     aws_cloudwatch_log_group.api_gateway,
-    aws_cloudwatch_log_resource_policy.api_gateway
+    aws_cloudwatch_log_resource_policy.api_gateway,
+    aws_apigatewayv2_route.default
   ]
 }
