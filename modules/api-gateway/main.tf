@@ -6,29 +6,6 @@ resource "aws_cloudwatch_log_group" "api_gateway" {
   tags = var.tags
 }
 
-# Add resource policy to allow API Gateway to write to the log group
-resource "aws_cloudwatch_log_resource_policy" "api_gateway" {
-  policy_name = "${var.api_name}-log-policy"
-
-  policy_document = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "apigateway.amazonaws.com"
-        }
-        Action = [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:CreateLogGroup"
-        ]
-        Resource = "${aws_cloudwatch_log_group.api_gateway.arn}:*"
-      }
-    ]
-  })
-}
-
 # Create API Gateway
 resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
@@ -88,11 +65,10 @@ resource "aws_apigatewayv2_stage" "default" {
 
   tags = var.tags
 
-  # Explicitly depend on the CloudWatch log group and policy being created
+  # Explicitly depend on the CloudWatch log group being created
   # This ensures AWS has time to propagate the log delivery configuration
   depends_on = [
     aws_cloudwatch_log_group.api_gateway,
-    aws_cloudwatch_log_resource_policy.api_gateway,
     aws_apigatewayv2_route.default
   ]
 }
