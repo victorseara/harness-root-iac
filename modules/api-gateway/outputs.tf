@@ -23,11 +23,6 @@ output "default_stage_invoke_url" {
   value       = aws_apigatewayv2_stage.default.invoke_url
 }
 
-output "log_group_name" {
-  description = "Name of the CloudWatch log group"
-  value       = aws_cloudwatch_log_group.api_gateway.name
-}
-
 output "default_stage_execution_arn" {
   description = "Execution ARN of the default stage"
   value       = aws_apigatewayv2_stage.default.execution_arn

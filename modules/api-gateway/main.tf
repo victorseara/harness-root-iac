@@ -1,12 +1,4 @@
-# Create CloudWatch log group for API Gateway with proper naming
-resource "aws_cloudwatch_log_group" "api_gateway" {
-  name              = "/aws/apigateway/${var.api_name}"
-  retention_in_days = var.log_retention_days
-
-  tags = var.tags
-}
-
-# Create API Gateway
+# Create API Gateway HTTP API
 resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
   description   = var.description
@@ -50,7 +42,7 @@ resource "aws_apigatewayv2_stage" "default" {
   auto_deploy = true
 
   access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
+    destination_arn = var.log_group_arn
     format = jsonencode({
       requestId      = "$context.requestId"
       ip             = "$context.identity.sourceIp"
@@ -64,9 +56,4 @@ resource "aws_apigatewayv2_stage" "default" {
   }
 
   tags = var.tags
-
-  # Wait for externally defined resources to be ready.
-  # This is used to pass in the dependency on aws_api_gateway_account.
-  # depends_on requires a static list, so we reference the variable directly.
-  depends_on = var.stage_depends_on
 }

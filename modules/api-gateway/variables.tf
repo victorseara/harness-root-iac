@@ -10,7 +10,12 @@ variable "description" {
 }
 
 variable "lambda_arn" {
-  description = "ARN of the Lambda function to integrate with (not invoke_arn)"
+  description = "ARN of the Lambda function to integrate with (invoke_arn)"
+  type        = string
+}
+
+variable "log_group_arn" {
+  description = "ARN of the CloudWatch log group for API Gateway access logs"
   type        = string
 }
 
@@ -56,20 +61,8 @@ variable "cors_allow_credentials" {
   default     = false
 }
 
-variable "log_retention_days" {
-  description = "CloudWatch log retention in days"
-  type        = number
-  default     = 7
-}
-
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
-}
-
-variable "stage_depends_on" {
-  description = "A list of resources the API Gateway stage should explicitly depend on."
-  type        = list(any)
-  default     = []
 }
