@@ -43,29 +43,15 @@ resource "aws_apigatewayv2_route" "default" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
-# Create stage without access logging first
-resource "aws_apigatewayv2_stage" "default" {
-  api_id      = aws_apigatewayv2_api.this.id
-  name        = "$default"
-  auto_deploy = true
+# Time delay to allow CloudWatch log group to propagate
+resource "time_sleep" "wait_for_log_group" {
+  depends_on = [aws_cloudwatch_log_group.api_gateway]
 
-  tags = var.tags
-
-  # Ensure route is created first
-  depends_on = [
-    aws_apigatewayv2_route.default
-  ]
-
-  # Lifecycle to prevent recreation when access logging is added
-  lifecycle {
-    ignore_changes = [
-      access_log_settings
-    ]
-  }
+  create_duration = "10s"
 }
 
-# Add access logging separately after stage is created
-resource "aws_apigatewayv2_stage" "default_with_logging" {
+# Create stage with access logging after a small delay
+resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
   auto_deploy = true
@@ -86,10 +72,9 @@ resource "aws_apigatewayv2_stage" "default_with_logging" {
 
   tags = var.tags
 
-  # Explicitly depend on the CloudWatch log group and initial stage being created
-  # This ensures AWS has time to propagate the log delivery configuration
+  # Wait for log group to propagate before creating stage
   depends_on = [
-    aws_cloudwatch_log_group.api_gateway,
-    aws_apigatewayv2_stage.default
+    aws_apigatewayv2_route.default,
+    time_sleep.wait_for_log_group
   ]
 }
