@@ -67,3 +67,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "stage_depends_on" {
+  description = "A list of resources the API Gateway stage should explicitly depend on."
+  type        = list(any)
+  default     = []
+}

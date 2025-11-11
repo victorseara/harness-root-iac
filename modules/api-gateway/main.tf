@@ -43,14 +43,7 @@ resource "aws_apigatewayv2_route" "default" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
-# Time delay to allow CloudWatch log group to propagate
-resource "time_sleep" "wait_for_log_group" {
-  depends_on = [aws_cloudwatch_log_group.api_gateway]
-
-  create_duration = "10s"
-}
-
-# Create stage with access logging after a small delay
+# Create stage with access logging
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
@@ -72,9 +65,9 @@ resource "aws_apigatewayv2_stage" "default" {
 
   tags = var.tags
 
-  # Wait for log group to propagate before creating stage
-  depends_on = [
+  # Wait for externally defined resources to be ready.
+  # This is used to pass in the dependency on aws_api_gateway_account.
+  depends_on = concat([
     aws_apigatewayv2_route.default,
-    time_sleep.wait_for_log_group
-  ]
+  ], var.stage_depends_on)
 }
