@@ -49,18 +49,6 @@ variable "environment_variables" {
   default     = {}
 }
 
-variable "ignore_source_code_hash" {
-  description = "Whether to ignore changes to source code hash (set to true when deployments are handled outside Terraform)"
-  type        = bool
-  default     = true
-}
-
-variable "depends_on_resources" {
-  description = "List of resources this Lambda function depends on"
-  type        = list(any)
-  default     = []
-}
-
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

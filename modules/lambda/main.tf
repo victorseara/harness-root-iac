@@ -7,18 +7,17 @@ resource "aws_lambda_function" "this" {
   runtime         = var.runtime
   timeout         = var.timeout
   memory_size     = var.memory_size
-  source_code_hash = var.ignore_source_code_hash ? null : filebase64sha256(var.filename)
+  source_code_hash = filebase64sha256(var.filename)
   description     = var.description
 
   environment {
     variables = var.environment_variables
   }
 
-  depends_on = var.depends_on_resources
-
   tags = var.tags
 
+  # Ignore source code changes - deployments handled separately
   lifecycle {
-    ignore_changes = var.ignore_source_code_hash ? [source_code_hash] : []
+    ignore_changes = [source_code_hash]
   }
 }

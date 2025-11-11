@@ -9,13 +9,13 @@ variable "description" {
   default     = ""
 }
 
-variable "lambda_arn" {
-  description = "ARN of the Lambda function to integrate with (invoke_arn)"
+variable "lambda_invoke_arn" {
+  description = "Invoke ARN of the Lambda function"
   type        = string
 }
 
 variable "log_group_arn" {
-  description = "ARN of the CloudWatch log group for API Gateway access logs"
+  description = "ARN of the CloudWatch log group for access logs"
   type        = string
 }
 

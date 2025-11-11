@@ -1,4 +1,4 @@
-# Create API Gateway HTTP API
+# API Gateway HTTP API
 resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
   description   = var.description
@@ -16,26 +16,26 @@ resource "aws_apigatewayv2_api" "this" {
   tags = var.tags
 }
 
-# Create Lambda integration
+# Lambda integration
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id = aws_apigatewayv2_api.this.id
 
   integration_type   = "AWS_PROXY"
-  integration_uri    = var.lambda_arn
+  integration_uri    = var.lambda_invoke_arn
   integration_method = "POST"
 
   payload_format_version = "2.0"
   timeout_milliseconds   = var.integration_timeout_ms
 }
 
-# Create default route
+# Default route
 resource "aws_apigatewayv2_route" "default" {
   api_id    = aws_apigatewayv2_api.this.id
   route_key = "$default"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
-# Create stage with access logging
+# Stage with access logging
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = "$default"
