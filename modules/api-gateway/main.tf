@@ -67,7 +67,6 @@ resource "aws_apigatewayv2_stage" "default" {
 
   # Wait for externally defined resources to be ready.
   # This is used to pass in the dependency on aws_api_gateway_account.
-  depends_on = concat([
-    aws_apigatewayv2_route.default,
-  ], var.stage_depends_on)
+  # depends_on requires a static list, so we reference the variable directly.
+  depends_on = var.stage_depends_on
 }
