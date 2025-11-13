@@ -1,5 +1,5 @@
 variable "workspace_name" {
-  description = "Name of the workspace (e.g., 'non-prod-user-repo', 'prod-checkout')"
+  description = "Name of the workspace (e.g., 'nonprod-user-repo', 'prod-checkout')"
   type        = string
 
   validation {

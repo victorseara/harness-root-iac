@@ -13,11 +13,11 @@ This module creates the foundational infrastructure for a workspace. A workspace
 module "workspace" {
   source = "../modules/foundations-workspace"
 
-  workspace_name      = "non-prod-user-repo"
+  workspace_name      = "nonprod-user-repo"
   log_retention_days  = 30
 
   tags = {
-    Environment = "non-prod"
+    Environment = "nonprod"
     Team        = "platform"
   }
 }
